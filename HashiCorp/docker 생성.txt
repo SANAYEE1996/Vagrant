@@ -1,0 +1,25 @@
+ 
+#!/bin/bash
+amazon-linux-extras install docker -y
+systemctl start docker && systemctl enable docker
+curl https://raw.githubusercontent.com/docker/docker-ce/master/components/cli/contrib/completion/bash/docker -o /etc/bash_completion.d/docker.sh
+usermod -a -G docker ec2-user
+
+FROM tomcat:9
+ENV TZ=Asia/Seoul
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+ADD ROOT.war /usr/local/tomcat/webapps/
+EXPOSE 8080
+CMD ["catalina.sh", "run"]
+
+
+docker build -t [docker ID 입력]/spring:v1.0 -f Dockerfile.spring .
+
+docker run -d -p 8080:8080 --name spring us03098/spring:v1.0
+
+docker cp ./ROOT.war spring:/usr/local/tomcat/webapps/
+
+docker push 사나이1996/spring:v1.0
+
+docker exec -it spring /bin/bash
+
